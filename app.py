@@ -1,79 +1,66 @@
 import streamlit as st
 import pandas as pd
-import joblib
+import pickle
+import numpy as np
 
-# Load model and preprocessors
-model = joblib.load("supplier_model.pkl")
-scaler = joblib.load("scaler (2).pkl")
-numeric_cols = joblib.load("numeric_cols (2).pkl")
-all_columns = joblib.load("columns.pkl")
+# Load model and other artifacts
+model = pickle.load(open('supplier_model.pkl', 'rb'))
+scaler = pickle.load(open('scaler.pkl', 'rb'))
+columns = pickle.load(open('columns.pkl', 'rb'))
+numeric_cols = pickle.load(open('numeric_cols (2).pkl', 'rb'))  # Use the correct renamed file
 
-# Define category options based on dummy columns
-supplier_options = ['Beta Supplies', 'Delta Logistics', 'Epsilon Group', 'Gamma Co']
-item_category_options = ['MRO', 'Office Supplies', 'Packaging', 'Raw Materials']
-order_status_options = ['Delivered', 'Partially Delivered', 'Pending']
-compliance_options = ['Yes', 'No']
-
-# App title
+# Title
 st.title("Supplier Reliability Predictor")
 st.write("Enter the supplier details to predict reliability.")
 
-# Form inputs
-quantity = st.number_input("Quantity:", min_value=0.0)
-unit_price = st.number_input("Unit Price:", min_value=0.0)
-negotiated_price = st.number_input("Negotiated Price:", min_value=0.0)
-defective_units = st.number_input("Defective Units:", min_value=0.0)
-delivery_days = st.number_input("Delivery Days:", min_value=0.0, step=1.0)
+# Input fields
+quantity = st.number_input("Quantity:", min_value=0.0, format="%.2f")
+unit_price = st.number_input("Unit Price:", min_value=0.0, format="%.2f")
+negotiated_price = st.number_input("Negotiated Price:", min_value=0.0, format="%.2f")
+defective_units = st.number_input("Defective Units:", min_value=0.0, format="%.2f")
+delivery_days = st.number_input("Delivery Days:", min_value=0.0, format="%.2f")
 
-supplier = st.selectbox("Supplier:", supplier_options)
-category = st.selectbox("Item Category:", item_category_options)
-order_status = st.selectbox("Order Status:", order_status_options)
-compliance = st.radio("Compliance:", compliance_options)
+supplier = st.selectbox("Supplier:", ['Alpha Corp', 'Beta Supplies', 'Gamma Co', 'Delta Logistics', 'Epsilon Group'])
+item_category = st.selectbox("Item Category:", ['Office Supplies', 'Raw Materials', 'MRO', 'Packaging'])
+order_status = st.selectbox("Order Status:", ['Delivered', 'Pending', 'Partially Delivered'])
+compliance = st.radio("Compliance:", ['Yes', 'No'])
 
-# Submit button
-if st.button("Predict Reliability"):
-    # Start input dict
-    input_data = {
-        "Quantity": quantity,
-        "Unit_Price": unit_price,
-        "Negotiated_Price": negotiated_price,
-        "Defective_Units": defective_units,
-        "Delivery_Days": delivery_days,
-
+if st.button("Predict"):
+    # Create input dictionary
+    input_dict = {
+        'Quantity': quantity,
+        'Unit_Price': unit_price,
+        'Negotiated_Price': negotiated_price,
+        'Defective_Units': defective_units,
+        'Delivery_Days': delivery_days,
+        'Supplier_' + supplier.replace(" ", "_"): 1,
+        'Item_Category_' + item_category.replace(" ", "_"): 1,
+        'Order_Status_' + order_status.replace(" ", "_"): 1,
+        'Compliance_Yes': 1 if compliance == 'Yes' else 0
     }
 
-    # Add one-hot encoded fields
-    for s in supplier_options:
-        input_data[f"Supplier_{s}"] = 1 if supplier == s else 0
-    for cat in item_category_options:
-        input_data[f"Item_Category_{cat}"] = 1 if category == cat else 0
-    for status in order_status_options:
-        input_data[f"Order_Status_{status}"] = 1 if order_status == status else 0
+    # Add missing categorical columns as 0
+    for col in columns:
+        if col not in input_dict:
+            input_dict[col] = 0
 
-    input_data["Compliance_Yes"] = 1 if compliance == "Yes" else 0
+    # Create input dataframe
+    input_df = pd.DataFrame([input_dict])
 
-    # Convert to DataFrame and align with expected columns
-    input_df = pd.DataFrame([input_data])
-    for col in all_columns:
-        if col not in input_df.columns:
-            input_df[col] = 0  # fill missing dummy columns
-
-    input_df = input_df[all_columns]  # reorder columns
-
-    # Scale numeric values
-    # Fix: ensure all numeric columns exist
-    missing_numeric = [col for col in numeric_cols if col not in input_df.columns]
-    
-    if missing_numeric:
-        st.error(f"❌ Error: Missing numeric columns in input: {missing_numeric}")
+    # Ensure all numeric columns are present
+    missing_num_cols = [col for col in numeric_cols if col not in input_df.columns]
+    if missing_num_cols:
+        st.error(f"Error: Missing numeric columns in input: {missing_num_cols}")
     else:
+        # Scale numeric features
         input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
 
-    # Predict
-    prediction = model.predict(input_df)
+        # Reorder columns to match training
+        input_df = input_df[columns]
 
-    # Result
-    if prediction[0] == 1:
-        st.success("✅ The supplier is predicted to be **RELIABLE**.")
-    else:
-        st.error("⚠️ The supplier is predicted to be **NOT RELIABLE**.")
+        # Predict
+        prediction = model.predict(input_df)[0]
+        if prediction == 1:
+            st.success("✅ The supplier is predicted to be RELIABLE.")
+        else:
+            st.warning("⚠️ The supplier is predicted to be NOT RELIABLE.")
