@@ -3,12 +3,17 @@ import pandas as pd
 import pickle
 import numpy as np
 
-# Load model and other artifacts
+# Load model
 model = pickle.load(open('supplier_model.pkl', 'rb'))
+# Load scaler
 scaler = pickle.load(open('scaler.pkl', 'rb'))
-columns = pickle.load(open('columns.pkl', 'rb'))
-numeric_cols = pickle.load(open('numeric_cols (2).pkl', 'rb'))  # Use the correct renamed file
-
+# Load column names
+with open('columns.pkl', 'rb') as f:
+    columns = pickle.load(f)
+# Load numeric columns
+with open('numeric_cols.pkl', 'rb') as f:
+    numeric_cols = pickle.load(f)
+    
 # Title
 st.title("Supplier Reliability Predictor")
 st.write("Enter the supplier details to predict reliability.")
