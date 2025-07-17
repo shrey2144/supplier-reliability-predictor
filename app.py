@@ -23,6 +23,7 @@ quantity = st.number_input("Quantity:", min_value=0.0)
 unit_price = st.number_input("Unit Price:", min_value=0.0)
 negotiated_price = st.number_input("Negotiated Price:", min_value=0.0)
 defective_units = st.number_input("Defective Units:", min_value=0.0)
+delivery_days = st.number_input("Delivery Days:", min_value=0.0, step=1.0)
 
 supplier = st.selectbox("Supplier:", supplier_options)
 category = st.selectbox("Item Category:", item_category_options)
@@ -37,6 +38,8 @@ if st.button("Predict Reliability"):
         "Unit_Price": unit_price,
         "Negotiated_Price": negotiated_price,
         "Defective_Units": defective_units,
+        "Delivery_Days": delivery_days,
+
     }
 
     # Add one-hot encoded fields
