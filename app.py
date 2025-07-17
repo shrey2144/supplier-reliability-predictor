@@ -58,6 +58,11 @@ if st.button("Predict Reliability"):
     input_df = input_df[all_columns]  # reorder columns
 
     # Scale numeric values
+    # Fix: ensure all numeric columns exist
+    missing_numeric = [col for col in numeric_cols if col not in input_df.columns]
+    if missing_numeric:
+    st.error(f"❌ Error: Missing numeric columns in input: {missing_numeric}")
+    else:
     input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
 
     # Predict
