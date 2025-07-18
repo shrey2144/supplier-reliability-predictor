@@ -82,8 +82,10 @@ F1-score	      89.5%
 These numbers may vary depending on the dataset split and hyperparameters. You can update them after each experiment.
 
 # Future Improvements:
-Here’s what I plan to do next:
+Here’s what I plan to do next: 
+
 -Deploy as a Streamlit web app
+
 -Save and reuse the model using joblib
 
 # License:
