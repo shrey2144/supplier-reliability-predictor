@@ -70,7 +70,7 @@ Evaluated using:
 # 6. Feature Importance
 I also visualized which supplier KPIs had the biggest impact on the reliability prediction. This is great for explaining the model to business stakeholders.
 
-Results:
+# Results:
 Here’s how the model performed on the test set:
 
 Metric	        Score (example)
@@ -81,24 +81,16 @@ F1-score	      89.5%
 
 These numbers may vary depending on the dataset split and hyperparameters. You can update them after each experiment.
 
-🔮 Future Improvements
+# Future Improvements:
 Here’s what I plan to do next:
+-Deploy as a Streamlit web app
+-Save and reuse the model using joblib
 
-Hyperparameter tuning with GridSearchCV
-
-Try other models like XGBoost or Logistic Regression
-
-Handle class imbalance using SMOTE
-
-Deploy as a Streamlit web app
-
-Save and reuse the model using joblib
-
-License:
+# License:
 This project is licensed under the MIT License.
 Feel free to fork, modify, or use it for your own projects.
 
-About Me:
+# About Me:
 I’m currently pursuing an MSc in Data Science and I love applying machine learning to solve real-world problems.
 This project gave me hands-on experience in both data preprocessing and predictive modeling in the procurement domain.
 
